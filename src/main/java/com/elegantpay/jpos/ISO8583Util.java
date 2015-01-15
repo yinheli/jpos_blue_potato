@@ -25,6 +25,16 @@ public class ISO8583Util {
     private ISO8583Util() {
     }
 
+    private static ISOMsg doUpack(byte[] raw) throws Exception {
+        byte[] header = Arrays.copyOfRange(raw, 2, 13);
+        ISOMsg msg = new ISOMsg();
+        msg.setPackager(packager);
+        msg.unpack(Arrays.copyOfRange(raw, 13, raw.length));
+        msg.setHeader(header);
+        return msg;
+    }
+
+
     /**
      * 从原始报文(hex)解析为 ISOMsg 对象
      *
@@ -45,12 +55,7 @@ public class ISO8583Util {
      * @throws Exception
      */
     public static ISOMsg unpack(byte[] raw) throws Exception {
-        byte[] header = Arrays.copyOfRange(raw, 2, 13);
-        ISOMsg msg = new ISOMsg();
-        msg.setPackager(packager);
-        msg.unpack(Arrays.copyOfRange(raw, 13, raw.length));
-        msg.setHeader(header);
-        return msg;
+        return doUpack(raw);
     }
 
 }

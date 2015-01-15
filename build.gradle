@@ -1,4 +1,3 @@
-
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
@@ -7,8 +6,8 @@ apply plugin: 'maven'
 group = 'com.elegantpay.jpos'
 version = '1.0.0'
 
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
+//targetCompatibility = '1.7'
+//sourceCompatibility = '1.7'
 
 idea {
     module {
@@ -48,4 +47,30 @@ task createDirs() {
 task libs(type: Sync) {
     from configurations.runtime
     into "$buildDir/lib"
+}
+
+buildscript{
+    repositories{
+        mavenCentral()
+    }
+    dependencies{
+        classpath 'net.sf.proguard:proguard-gradle:5.1'
+    }
+}
+
+task proguard(type: proguard.gradle.ProGuardTask,dependsOn:jar) {
+    injars jar.archivePath
+    outjars "build/${jar.baseName}_build.jar"
+    libraryjars "${System.getProperty('java.home')}/Classes/classes.jar"
+    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    libraryjars configurations.compile
+    configuration 'proguard.pro'
+}
+
+task proguardCheck(type:Test,dependsOn:proguard){
+    testLogging {
+        exceptionFormat "full"
+        showStandardStreams true
+    }
+    classpath = classpath-files(sourceSets.main.output.classesDir)+files("build/${jar.baseName}_build.jar")
 }
